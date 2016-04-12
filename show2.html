@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+	<title>轮播图 无缝切换</title>
+</head>
+<style type="text/css">
+*{
+	padding: 0px;
+	margin:0px;
+}
+.carousel{
+	position: relative;
+	overflow: hidden;
+}
+	ul{
+		list-style: none;
+		position: absolute;
+	}
+	li{
+		float: left;
+	}
+	.btnBox{
+		position: absolute;
+		width: 80px;
+	}
+	.btnBox>a{
+		display: inline-block;
+		border-radius: 5px;
+		width: 8px;
+		height: 8px;
+		background: white;
+
+	}
+	
+	.btnBox>a:hover{
+		background: grey;
+	}
+
+
+
+</style>
+<body>
+<div class='carousel'>
+	<ul>
+		<li><img src="img/show1.jpg"></li>
+		<li><img src="img/show4.jpg"></li>
+		<li><img src="img/show3.jpg"></li>
+	</ul>
+	<div class='btnBox'>
+		<a href="javascript:;"></a>
+		<a href="javascript:;"></a>
+		<a href="javascript:;"></a>
+	</div>
+</div>
+<script type="text/javascript">
+//运动框架  缓冲运动
+function moveTo(iTarget,obj,callback){
+	clearInterval(timer);
+	var speed=0;
+	var position=obj.offsetLeft;
+	var timer=setInterval(function(){
+		speed=(iTarget-position)/10;//小于0 则是从右向左  大于0 则是从左向右
+		speed=speed>0?Math.ceil(speed):Math.floor(speed);//然后用三目运算符对速度进行处理,一面卡在某一像素处无法前进
+		position=position+speed;
+		if(position==iTarget){
+			clearInterval(timer);
+			if(callback){
+				callback();
+			}			
+		}
+		else{
+			obj.style.left=position+'px';			
+		}		
+	},10);
+	
+}
+	window.onload=function(){
+		var box=document.getElementsByClassName('carousel')[0];
+		var oUl=document.getElementsByTagName('ul')[0];
+		var oLi=document.getElementsByTagName('li');
+		var oImg=document.getElementsByTagName('img');
+		var oBtnBox=document.getElementsByClassName('btnBox')[0];
+		var oA=document.getElementsByTagName('a');
+		var width=document.documentElement.clientWidth;
+		var height=400;
+		var index=0;//循环按钮
+		var index2=0;//循环图片	
+		var timer1=setInterval(move,3000);
+		//
+		oA[0].style.background='grey';
+		//给外层div高度,img撑不起容器高度
+		box.style.height=height+'px';
+		//设置列表的宽度,否则图片不会横向排列
+		oUl.style.width=width*oImg.length+'px';
+		//给图片设置宽高,填充满容器
+		for(var i=0;i<oImg.length;i++){
+			oImg[i].style.width=width+'px';
+			oImg[i].style.height=height+'px';
+		}
+
+		//给btn按钮组定位
+		oBtnBox.style.left=(document.documentElement.clientWidth-oBtnBox.offsetWidth)*0.5+'px';
+		oBtnBox.style.top=height-50+'px';
+
+		//给btn按钮添加功能
+		
+		for(var j=0;j<oA.length;j++){
+				oA[j].index=j;
+				oA[j].onclick=function(){
+					//先把所有按钮都变成白色
+				clearInterval(timer1);
+					for(var k=0;k<oA.length;k++){
+						oA[k].style.background='white';
+					}
+				oA[this.index].style.background='grey';				
+				end=-this.index*width;				
+				start=oUl.offsetLeft;
+				moveTo(end,oUl);
+				//为了使得自动播放接着当前点击的图片后播放,要把index值,和index2值进行更改,更改为当前点击的图片索引值.至于index值的判断以及index2值的处理都放在下面自动播放的函数中
+				index=this.index;//点击后更改index的值  按钮值
+				index2=this.index;//点击后更改index2的值  图片值
+				timer1=setInterval(move,3000);
+				}
+			}
+						
+		//自动播放功能		
+		function move(){
+			if(index==oLi.length-1){
+				oLi[0].style.position='relative';
+				oLi[0].style.left=oLi.length*width+'px';
+				index=0;
+			}
+			else{
+				index=index+1;//累加 自动播放的下一张
+			}
+			index2++;
+			for(var k=0;k<oA.length;k++){
+					oA[k].style.background='white';
+				}
+			oA[index].style.background='grey';
+			start=oUl.offsetLeft;
+			end=-index2*width;
+			moveTo(end,oUl,function(){				
+				if(index==0){
+					oLi[0].style.position='static';
+					oUl.style.left=0+'px';
+					index2=0;
+				}
+			});		
+		}		
+	}
+</script>
+</body>
+</html>
